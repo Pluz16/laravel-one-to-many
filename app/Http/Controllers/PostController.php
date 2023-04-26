@@ -1,13 +1,12 @@
 <?php
 namespace App\Http\Controllers;
+
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
 use App\Models\Post;
 use Illuminate\Http\Request;
+use App\Models\Category;
 use Illuminate\Support\Str;
-use Illuminate\Session\Store;
-
-
 class PostController extends Controller
 {
     /**
@@ -17,20 +16,15 @@ class PostController extends Controller
      */
     public function index(Request $request)
     {
-
         $trashed = $request->input('trashed');
-
         if ($trashed) {
             $posts = Post::onlyTrashed()->get();
         } else {
             $posts = Post::all();
         }
-
         $num_of_trashed = Post::onlyTrashed()->count();
-
         return view('posts.index', compact('posts', 'num_of_trashed'));
     }
-
     /**
      * Show the form for creating a new resource.
      *
@@ -38,8 +32,11 @@ class PostController extends Controller
      */
     public function create()
     {
-        return view('posts.create');
+        $categories = Category::orderBy('name', 'asc')->get();
+
+        return view('posts.create', compact('categories'));
     }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -48,7 +45,9 @@ class PostController extends Controller
      */
     public function store(StorePostRequest $request)
     {
+
         $data = $request->validated();
+
         $data['slug'] = Str::slug($data['title']);
         $post = Post::create($data);
         return to_route('posts.show', $post);
@@ -71,8 +70,11 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
-        return view('posts.edit', compact('post'));
+        $categories = Category::orderBy('name', 'asc')->get();
+
+        return view('posts.edit', compact('post', 'categories'));
     }
+
     /**
      * Update the specified resource in storage.
      *
@@ -89,17 +91,12 @@ class PostController extends Controller
         $post->update($data);
         return to_route('posts.show', $post);
     }
-
     public function restore(Request $request, Post $post)
     {
-
         if ($post->trashed()) {
             $post->restore();
-
-            return redirect()->route('posts.show', $post)->with('message', 'Post ripristinato con successo!');
-
+            $request->session()->flash('message', 'Il post è stato ripristinato.');
         }
-
         return back();
     }
     /**
@@ -115,8 +112,6 @@ class PostController extends Controller
         } else {
             $post->delete(); //eliminazione soft
         }
-
-
         return back();
     }
 }
