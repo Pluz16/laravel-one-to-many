@@ -15,7 +15,6 @@
         </div>
         </div>
 
-
             <div class="d-flex">
                 <a class="btn btn-sm btn-secondary" href="{{ route('posts.edit',$post) }}">Modifica</a>
                 @if($post->trashed())
@@ -28,9 +27,27 @@
             
         </div>
     </div>
-    <div class="container">
-        <p>
-            {{ $post->content }}
-        </p>
+    <div class="container pt-5 pb-3">
+  <p>{{ $post->content }}</p>
+</div>
+
+<div class="container">
+  <h2 class="mb-4">Articoli correlati</h2>
+  @if($post->category)
+    <ul class="list-group">
+      @foreach($post->category->posts as $related_post)
+        <li class="list-group-item border-0 py-2">
+          <a href="{{ route('posts.show', $related_post) }}">
+            {{ $related_post->title }}
+          </a>
+        </li>
+      @endforeach
+    </ul>
+  @else
+    <div class="alert alert-warning" role="alert">
+      Nessun articolo correlato trovato.
     </div>
+  @endif
+</div>
+
 @endsection
