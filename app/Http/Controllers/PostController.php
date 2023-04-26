@@ -1,12 +1,12 @@
 <?php
-
 namespace App\Http\Controllers;
-
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Session\Store;
+
 
 class PostController extends Controller
 {
@@ -40,7 +40,6 @@ class PostController extends Controller
     {
         return view('posts.create');
     }
-
     /**
      * Store a newly created resource in storage.
      *
@@ -50,14 +49,10 @@ class PostController extends Controller
     public function store(StorePostRequest $request)
     {
         $data = $request->validated();
-
         $data['slug'] = Str::slug($data['title']);
-
         $post = Post::create($data);
-
         return to_route('posts.show', $post);
     }
-
     /**
      * Display the specified resource.
      *
@@ -68,7 +63,6 @@ class PostController extends Controller
     {
         return view('posts.show', compact('post'));
     }
-
     /**
      * Show the form for editing the specified resource.
      *
@@ -79,7 +73,6 @@ class PostController extends Controller
     {
         return view('posts.edit', compact('post'));
     }
-
     /**
      * Update the specified resource in storage.
      *
@@ -90,13 +83,10 @@ class PostController extends Controller
     public function update(UpdatePostRequest $request, Post $post)
     {
         $data = $request->validated();
-
         if ($data['title'] !== $post->title) {
             $data['slug'] = Str::slug($data['title']);
         }
-
         $post->update($data);
-
         return to_route('posts.show', $post);
     }
 
@@ -106,12 +96,12 @@ class PostController extends Controller
         if ($post->trashed()) {
             $post->restore();
 
-            $request->session()->flash('message', 'Il post è stato ripristinato.');
+            return redirect()->route('posts.show', $post)->with('message', 'Post ripristinato con successo!');
+
         }
 
         return back();
     }
-
     /**
      * Remove the specified resource from storage.
      *

@@ -3,7 +3,7 @@
 @section('content')
     @if(request()->session()->exists('message'))
 
-        <div class="alert alert-primary" role="alert">
+        <div class="alert alert-info" role="alert">
           {{ request()->session()->pull('message') }}
         </div>
 
@@ -13,21 +13,20 @@
         <h1 class="me-auto">Tutti i post</h1>
 
 
-        
+
 
         <div>
           @if(request('trashed'))
-            <a class="btn btn-sm btn-light" href="{{ route('posts.index') }}">Tutti i post</a>
+            <a class="btn btn-sm btn-outline-secondary btn-light" href="{{ route('posts.index') }}">Tutti i post</a>
           @else
-            <a class="btn btn-sm btn-light" href="{{ route('posts.index',['trashed' => true]) }}">Cestino ({{ $num_of_trashed}})</a>
+            <a class="btn btn-sm btn-outline-secondary btn-light" href="{{ route('posts.index',['trashed' => true]) }}">Cestino ({{ $num_of_trashed}})</a>
           @endif
-          <a class="btn btn-sm btn-primary" href="{{ route('posts.create') }}">Nuovo post</a>
+          <a class="btn btn-lg btn-primary rounded-pill shadow" href="{{ route('posts.create') }}">Nuovo post</a>
         </div>
       </div>
     </div>
-
     <div class="container">
-      <table class="table table-striped table-inverse table-responsive">
+    <table class="table table-bordered table-responsive">
         <thead>
           <tr>
             <th>ID</th>
