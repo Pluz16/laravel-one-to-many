@@ -3,10 +3,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
-use App\Models\Post;
-use Illuminate\Http\Request;
 use App\Models\Category;
+use App\Models\Post;
+use App\Models\Tag;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+
 class PostController extends Controller
 {
     /**
@@ -25,6 +27,7 @@ class PostController extends Controller
         $num_of_trashed = Post::onlyTrashed()->count();
         return view('posts.index', compact('posts', 'num_of_trashed'));
     }
+
     /**
      * Show the form for creating a new resource.
      *
@@ -33,8 +36,9 @@ class PostController extends Controller
     public function create()
     {
         $categories = Category::orderBy('name', 'asc')->get();
+        $tags = Tag::orderBy('name', 'asc')->get();
 
-        return view('posts.create', compact('categories'));
+        return view('posts.create', compact('categories', 'tags'));
     }
 
     /**
@@ -44,14 +48,26 @@ class PostController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(StorePostRequest $request)
-    {
+{
+    $validatedData = $request->validate([
+        'title' => 'required|max:255',
+        'content' => 'required',
+        'category_id' => 'nullable|exists:categories,id',
+        'tag_id' => 'nullable|exists:tags,id',
+    ]);
+    
+    $post = new Post();
+    $post->title = $validatedData['title'];
+    $post->content = $validatedData['content'];
+    $post->category_id = $validatedData['category_id'];
+    $post->tag_id = $validatedData['tag_id'];
+    $post->slug = $validatedData['slug'];
+    
+    $post->save();
 
-        $data = $request->validated();
+    return redirect()->route('posts.show', $post->id);
+}
 
-        $data['slug'] = Str::slug($data['title']);
-        $post = Post::create($data);
-        return to_route('posts.show', $post);
-    }
     /**
      * Display the specified resource.
      *
@@ -62,6 +78,7 @@ class PostController extends Controller
     {
         return view('posts.show', compact('post'));
     }
+
     /**
      * Show the form for editing the specified resource.
      *
@@ -71,8 +88,9 @@ class PostController extends Controller
     public function edit(Post $post)
     {
         $categories = Category::orderBy('name', 'asc')->get();
+        $tags = Tag::orderBy('name', 'asc')->get();
 
-        return view('posts.edit', compact('post', 'categories'));
+        return view('posts.edit', compact('post', 'categories', 'tags'));
     }
 
     /**
@@ -84,21 +102,16 @@ class PostController extends Controller
      */
     public function update(UpdatePostRequest $request, Post $post)
     {
-        $data = $request->validated();
-        if ($data['title'] !== $post->title) {
-            $data['slug'] = Str::slug($data['title']);
-        }
-        $post->update($data);
-        return to_route('posts.show', $post);
+        $validatedData = $request->validated();
+
+        $validatedData['slug'] = Str::slug($validatedData['title']);
+
+        $post->fill($validatedData);
+        $post->save();
+
+        return redirect()->route('posts.show', $post);
     }
-    public function restore(Request $request, Post $post)
-    {
-        if ($post->trashed()) {
-            $post->restore();
-            $request->session()->flash('message', 'Il post è stato ripristinato.');
-        }
-        return back();
-    }
+
     /**
      * Remove the specified resource from storage.
      *
@@ -115,3 +128,5 @@ class PostController extends Controller
         return back();
     }
 }
+    /**
+     * Restore the specified resource from
