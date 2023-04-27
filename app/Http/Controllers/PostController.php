@@ -128,5 +128,3 @@ class PostController extends Controller
         return back();
     }
 }
-    /**
-     * Restore the specified resource from

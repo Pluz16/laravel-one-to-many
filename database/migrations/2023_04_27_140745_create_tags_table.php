@@ -15,6 +15,8 @@ return new class extends Migration
     {
         Schema::create('tags', function (Blueprint $table) {
             $table->id();
+            $table->string('name', 100)->unique();
+            $table->string('slug', 150);
             $table->timestamps();
         });
     }
@@ -28,4 +30,4 @@ return new class extends Migration
     {
         Schema::dropIfExists('tags');
     }
-};
+};;
