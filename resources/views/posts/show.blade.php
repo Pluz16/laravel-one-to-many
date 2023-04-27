@@ -10,6 +10,9 @@
             @else
                 <span class="badge rounded-pill bg-secondary me-3">Nessuna categoria</span>
             @endif
+            @if($post->tag)
+            <span class="badge rounded-pill bg-primary me-3">{{ $post->tag->name }}</span>
+            @endif
             <a href="{{ route('posts.edit', $post) }}" class="btn btn-sm btn-primary">Modifica</a>
             </div>
         </div>
